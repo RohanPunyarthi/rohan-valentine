@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Valentine?</title>
+  <style>
+    :root{
+      --bg1:#0b0b16;
+      --bg2:#1a0b2e;
+      --pink:#ff4da6;
+      --pink2:#ff79c6;
+      --text:#f7f4ff;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--text);
+      min-height:100vh;
+      overflow:hidden;
+      background: radial-gradient(1200px 700px at 30% 20%, #2a0b45 0%, transparent 60%),
+                  radial-gradient(900px 600px at 70% 70%, #3a0f2a 0%, transparent 55%),
+                  linear-gradient(135deg, var(--bg1), var(--bg2));
+    }
+    .wrap{
+      position:relative;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+    .card{
+      width:min(720px, 92vw);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+      border-radius: 24px;
+      padding: 28px 22px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      text-align:center;
+      position:relative;
+    }
+    h1{
+      margin: 6px 0 8px;
+      font-size: clamp(28px, 4vw, 44px);
+      letter-spacing: 0.2px;
+    }
+    p{
+      margin: 0 0 20px;
+      opacity: 0.9;
+      font-size: clamp(14px, 2vw, 18px);
+    }
+    .btnRow{
+      display:flex;
+      gap:14px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    .btn{
+      border:0;
+      cursor:pointer;
+      padding: 14px 22px;
+      border-radius: 999px;
+      font-size: 18px;
+      font-weight: 700;
+      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:active{ transform: scale(0.98); }
+
+    .yes{
+      background: linear-gradient(135deg, var(--pink), var(--pink2));
+      color: #140012;
+      box-shadow: 0 14px 30px rgba(255,77,166,0.30);
+    }
+    .yes:hover{ filter: brightness(1.05); }
+
+    /* The "No" button will be positioned absolutely so it can run away */
+    .no{
+      position:absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      padding: 6px 8px;
+      font-size: 10px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.14);
+      color: rgba(255,255,255,0.92);
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+    }
+    .no:hover{ transform: translate(-50%, -50%) scale(1.05); }
+
+    .hint{
+      margin-top: 18px;
+      font-size: 13px;
+      opacity: 0.75;
+    }
+
+    /* Celebration screen */
+    #celebrate{
+      display:none;
+    }
+    .big{
+      font-size: clamp(26px, 4vw, 46px);
+      margin: 6px 0 10px;
+    }
+    .sub{
+      font-size: clamp(16px, 2.2vw, 22px);
+      margin: 0;
+      opacity: 0.92;
+    }
+    .badge{
+      display:inline-block;
+      margin-top: 18px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.16);
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+
+    /* Canvas overlay for fireworks/confetti */
+    canvas{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+    }
+
+    /* Floating hearts background (simple) */
+    .heart{
+      position:fixed;
+      width:10px; height:10px;
+      background: var(--pink);
+      transform: rotate(45deg);
+      opacity:.20;
+      animation: floatUp linear infinite;
+      filter: blur(.1px);
+    }
+    .heart:before, .heart:after{
+      content:"";
+      position:absolute;
+      width:10px; height:10px;
+      background: var(--pink);
+      border-radius: 50%;
+    }
+    .heart:before{ left:-5px; top:0; }
+    .heart:after{ left:0; top:-5px; }
+
+    @keyframes floatUp{
+      from { transform: translateY(20vh) rotate(45deg); }
+      to   { transform: translateY(-120vh) rotate(45deg); }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="fx"></canvas>
+
+  <div class="wrap">
+    <!-- ASK SCREEN -->
+    <div class="card" id="ask">
+      <h1>Will you be my Valentine? 💘</h1>
+      <p>I promise unlimited hugs, snacks, and “good morning” texts.</p>
+
+      <div class="btnRow">
+        <button class="btn yes" id="yesBtn">Yes 💖</button>
+      </div>
+
+      <!-- "No" lives outside btnRow so it can run around -->
+      <button class="btn no" id="noBtn" aria-label="No">no</button>
+
+      <div class="hint">Try clicking “No” 😄</div>
+    </div>
+
+    <!-- CELEBRATION SCREEN -->
+    <div class="card" id="celebrate">
+      <h1 class="big">🎆 Congratulations! 🎆</h1>
+      <p class="sub">You are now <strong>Rohan’s Valentine</strong>! 💞</p>
+      <div class="badge">Happy Valentine’s Day 💌</div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Floating hearts background ----------
+    const hearts = 18;
+    for (let i = 0; i < hearts; i++) {
+      const h = document.createElement('div');
+      h.className = 'heart';
+      const left = Math.random() * 100;
+      const dur = 6 + Math.random() * 10;
+      const delay = Math.random() * 6;
+      const size = 6 + Math.random() * 10;
+      h.style.left = left + 'vw';
+      h.style.bottom = (-10 - Math.random()*40) + 'vh';
+      h.style.width = size + 'px';
+      h.style.height = size + 'px';
+      h.style.animationDuration = dur + 's';
+      h.style.animationDelay = delay + 's';
+      h.style.opacity = (0.10 + Math.random() * 0.20).toFixed(2);
+      document.body.appendChild(h);
+    }
+
+    // ---------- Runaway "No" button ----------
+    const noBtn = document.getElementById('noBtn');
+    const askCard = document.getElementById('ask');
+
+    function placeNoRandom() {
+      const rect = askCard.getBoundingClientRect();
+      // keep within the card bounds with padding
+      const pad = 18;
+      const maxX = rect.width - noBtn.offsetWidth - pad;
+      const maxY = rect.height - noBtn.offsetHeight - pad;
+
+      const x = pad + Math.random() * Math.max(1, maxX - pad);
+      const y = pad + Math.random() * Math.max(1, maxY - pad);
+
+      // position relative to the card
+      noBtn.style.left = x + 'px';
+      noBtn.style.top  = y + 'px';
+      noBtn.style.transform = 'translate(0,0)';
+    }
+
+    // make it tiny and annoying (as requested)
+    noBtn.style.width = '34px';
+
+    // On hover / mouse move near it, it escapes
+    noBtn.addEventListener('mouseenter', placeNoRandom);
+    noBtn.addEventListener('mousemove', placeNoRandom);
+    noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); placeNoRandom(); }, {passive:false});
+    window.addEventListener('resize', () => setTimeout(placeNoRandom, 80));
+    setTimeout(placeNoRandom, 50);
+
+    // ---------- Yes -> celebration + fireworks/confetti ----------
+    const yesBtn = document.getElementById('yesBtn');
+    const ask = document.getElementById('ask');
+    const celebrate = document.getElementById('celebrate');
+
+    yesBtn.addEventListener('click', () => {
+      ask.style.display = 'none';
+      celebrate.style.display = 'block';
+      startFireworks();
+    });
+
+    // Simple canvas fireworks/confetti (no libraries)
+    const canvas = document.getElementById('fx');
+    const ctx = canvas.getContext('2d');
+    let W, H;
+    function resize() {
+      W = canvas.width = window.innerWidth * devicePixelRatio;
+      H = canvas.height = window.innerHeight * devicePixelRatio;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function rand(min, max){ return Math.random()*(max-min)+min; }
+
+    let particles = [];
+    let running = false;
+
+    function burst(x, y) {
+      const count = 120;
+      for (let i = 0; i < count; i++){
+        const a = rand(0, Math.PI*2);
+        const s = rand(2, 7) * devicePixelRatio;
+        particles.push({
+          x, y,
+          vx: Math.cos(a)*s,
+          vy: Math.sin(a)*s,
+          g: 0.06 * devicePixelRatio,
+          life: rand(40, 90),
+          r: rand(1, 3.2) * devicePixelRatio,
+          hue: rand(290, 360),   // pink/purple-ish
+          alpha: 1
+        });
+      }
+    }
+
+    function confettiRain() {
+      // gentle rain of confetti for a few seconds
+      for (let i=0;i<18;i++){
+        particles.push({
+          x: rand(0, W),
+          y: -20,
+          vx: rand(-1.2, 1.2) * devicePixelRatio,
+          vy: rand(1.4, 3.4) * devicePixelRatio,
+          g: 0.02 * devicePixelRatio,
+          life: rand(80, 140),
+          r: rand(1.2, 2.6) * devicePixelRatio,
+          hue: rand(290, 360),
+          alpha: 0.95
+        });
+      }
+    }
+
+    function step(){
+      if (!running) return;
+      ctx.clearRect(0,0,W,H);
+
+      // draw & update
+      for (let i = particles.length - 1; i >= 0; i--){
+        const p = particles[i];
+        p.vy += p.g;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= 1;
+        p.alpha = Math.max(0, p.life / 90);
+
+        ctx.beginPath();
+        ctx.fillStyle = `hsla(${p.hue}, 100%, 70%, ${p.alpha})`;
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.fill();
+
+        if (p.life <= 0 || p.y > H + 40) particles.splice(i, 1);
+      }
+
+      requestAnimationFrame(step);
+    }
+
+    function startFireworks(){
+      running = true;
+      step();
+
+      // several bursts
+      const bursts = 7;
+      for (let i=0;i<bursts;i++){
+        setTimeout(() => {
+          burst(rand(W*0.2, W*0.8), rand(H*0.2, H*0.55));
+        }, i * 380);
+      }
+
+      // confetti rain for ~4 seconds
+      const rainStart = Date.now();
+      const rainTimer = setInterval(() => {
+        confettiRain();
+        if (Date.now() - rainStart > 4200) clearInterval(rainTimer);
+      }, 140);
+
+      // stop rendering after a while (keeps things light)
+      setTimeout(() => { running = false; ctx.clearRect(0,0,W,H); }, 9000);
+    }
+  </script>
+</body>
+</html>
